@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61D9F17BED1DAD06ACC2A542 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18BF2DB8ADBCF67C38E226FC /* libPods.a */; };
 		96C751BB1AB542FB00E79964 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C751BA1AB542FB00E79964 /* AppDelegate.swift */; };
 		96C751BD1AB542FB00E79964 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C751BC1AB542FB00E79964 /* ViewController.swift */; };
 		96C751C01AB542FB00E79964 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96C751BE1AB542FB00E79964 /* Main.storyboard */; };
 		96C751C21AB542FB00E79964 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96C751C11AB542FB00E79964 /* Images.xcassets */; };
 		96C751C51AB542FB00E79964 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 96C751C31AB542FB00E79964 /* LaunchScreen.xib */; };
 		96C751D11AB542FB00E79964 /* Flickr_EyeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C751D01AB542FB00E79964 /* Flickr_EyeTests.swift */; };
+		96C751DF1AB55E1C00E79964 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96C751DE1AB55E1C00E79964 /* AVFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +28,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		18BF2DB8ADBCF67C38E226FC /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		319AAC3BB55D6749D79DF92F /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		96C751B51AB542FB00E79964 /* Flickr Eye.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Flickr Eye.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		96C751B91AB542FB00E79964 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96C751BA1AB542FB00E79964 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -36,6 +40,9 @@
 		96C751CA1AB542FB00E79964 /* Flickr EyeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Flickr EyeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		96C751CF1AB542FB00E79964 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96C751D01AB542FB00E79964 /* Flickr_EyeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flickr_EyeTests.swift; sourceTree = "<group>"; };
+		96C751DD1AB556A700E79964 /* CtowiftHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CtowiftHeader.h; sourceTree = "<group>"; };
+		96C751DE1AB55E1C00E79964 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		C5E695CC73B7DF1454909F9F /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +50,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96C751DF1AB55E1C00E79964 /* AVFoundation.framework in Frameworks */,
+				61D9F17BED1DAD06ACC2A542 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,12 +65,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		279B72DA3D9BBE144BBCB6E9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				C5E695CC73B7DF1454909F9F /* Pods.debug.xcconfig */,
+				319AAC3BB55D6749D79DF92F /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		96C751AC1AB542FB00E79964 = {
 			isa = PBXGroup;
 			children = (
 				96C751B71AB542FB00E79964 /* Flickr Eye */,
 				96C751CD1AB542FB00E79964 /* Flickr EyeTests */,
 				96C751B61AB542FB00E79964 /* Products */,
+				279B72DA3D9BBE144BBCB6E9 /* Pods */,
+				99D77C9AAC6FD413ADE556DB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -83,6 +103,7 @@
 				96C751C11AB542FB00E79964 /* Images.xcassets */,
 				96C751C31AB542FB00E79964 /* LaunchScreen.xib */,
 				96C751B81AB542FB00E79964 /* Supporting Files */,
+				96C751DD1AB556A700E79964 /* CtowiftHeader.h */,
 			);
 			path = "Flickr Eye";
 			sourceTree = "<group>";
@@ -112,6 +133,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		99D77C9AAC6FD413ADE556DB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				96C751DE1AB55E1C00E79964 /* AVFoundation.framework */,
+				18BF2DB8ADBCF67C38E226FC /* libPods.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -119,9 +149,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 96C751D41AB542FB00E79964 /* Build configuration list for PBXNativeTarget "Flickr Eye" */;
 			buildPhases = (
+				1FCCB1CE12DA6CECE915AD01 /* Check Pods Manifest.lock */,
 				96C751B11AB542FB00E79964 /* Sources */,
 				96C751B21AB542FB00E79964 /* Frameworks */,
 				96C751B31AB542FB00E79964 /* Resources */,
+				22A8DAD716F244E45BB9D68F /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -206,6 +238,39 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1FCCB1CE12DA6CECE915AD01 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		22A8DAD716F244E45BB9D68F /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		96C751B11AB542FB00E79964 /* Sources */ = {
@@ -336,21 +401,25 @@
 		};
 		96C751D51AB542FB00E79964 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C5E695CC73B7DF1454909F9F /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Flickr Eye/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/pouria/Desktop/Apps/production/Flickr Eye/Flickr Eye/Flickr Eye/CtowiftHeader.h";
 			};
 			name = Debug;
 		};
 		96C751D61AB542FB00E79964 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 319AAC3BB55D6749D79DF92F /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Flickr Eye/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/pouria/Desktop/Apps/production/Flickr Eye/Flickr Eye/Flickr Eye/CtowiftHeader.h";
 			};
 			name = Release;
 		};
@@ -407,6 +476,7 @@
 				96C751D61AB542FB00E79964 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		96C751D71AB542FB00E79964 /* Build configuration list for PBXNativeTarget "Flickr EyeTests" */ = {
 			isa = XCConfigurationList;
@@ -415,6 +485,7 @@
 				96C751D91AB542FB00E79964 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
