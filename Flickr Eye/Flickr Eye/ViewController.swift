@@ -4,10 +4,6 @@
 //  Copyright (c) 2015 Pouria Sanae. All rights reserved.
 
 //To do:
-// make Color search
-// make object search
-// Cut image
-// send 5 images and compaire result
 // Chnage "I see" to melody
 // add Live view 
 //
@@ -25,26 +21,43 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBOutlet weak var capturedImage: UIImageView!
     @IBOutlet weak var takePictureButton: UIButton!
     
+    @IBOutlet weak var cropImg1: UIImageView!
+    @IBOutlet weak var cropImg2: UIImageView!
+    @IBOutlet weak var cropImg3: UIImageView!
+    @IBOutlet weak var cropImg4: UIImageView!
+    
+    
     let picker = UIImagePickerController()
     var captureSession: AVCaptureSession?
     var stillImageOutput: AVCaptureStillImageOutput?
     var previewLayer: AVCaptureVideoPreviewLayer?
     var busyWaiting : Bool = false
     var hasAlreadyStarted : Bool = false
-    var switchIsOn: Bool = false
+    var myResultArray:[(name: String, value: Float)] = []
+    var cropCount = 0
     enum searchTypes : Int {
         case Object
         case Color
-        case currency
+        case Currency
+        case Live
+        case Test
     }
     var searchSetting = searchTypes.Object
-    
+    let colorString : String = "monochrome blackandwhite white background aposematic coloration black blue ultramarine blue chromatic gold gray green magenta monochrome neon orange pink purple crimson fuschia maroon red reddish teal white yellow "
+    let exceptionString : String = "outdoor indoor minimalism depth of field blur abstract vintage empty"
     
     
     //* * * Override Functions * * *
     override func viewDidLoad() {
         super.viewDidLoad()
         picker.delegate = self  //Delegate is used to segaue back to its self
+        
+        //hide all test images
+        self.cropImg1.hidden = true
+        self.cropImg2.hidden = true
+        self.cropImg3.hidden = true
+        self.cropImg4.hidden = true
+        
         if UIImagePickerController.availableCaptureModesForCameraDevice(.Rear) != nil {
             welcomeIntroCamera()
         } else {
@@ -60,6 +73,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     override func viewWillAppear(animated: Bool) {
         if UIImagePickerController.availableCaptureModesForCameraDevice(.Rear) == nil { return  } // no Camera
         
+        //hide all test images
+        self.cropImg1.hidden = true
+        self.cropImg2.hidden = true
+        self.cropImg3.hidden = true
+        self.cropImg4.hidden = true
+        
         //AVCaptureSessionPresetPhoto  //Original
         //AVCaptureSessionPresetLow
         //AVCaptureSessionPresetMedium
@@ -69,7 +88,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         //AVCaptureSessionPresetiFrame960x540
         //AVCaptureSessionPreset1280x720
         captureSession = AVCaptureSession()
-        captureSession!.sessionPreset = AVCaptureSessionPreset1280x720
+        println("640x480")
+        captureSession!.sessionPreset = AVCaptureSessionPreset640x480
         
         //Select camer, defaul is the rear camera
         var backCamera = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
@@ -90,7 +110,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         
     }
-    
     
     
     //* * * Actions * * *
@@ -119,22 +138,38 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         // need to change the isze of the image here
         //http://stackoverflow.com/questions/2658738/the-simplest-way-to-resize-an-uiimage
         dismissViewControllerAnimated(true, completion: {
-            self.sendImagePOST(chosenImage)
             self.capturedImage.contentMode = .ScaleAspectFit
             self.capturedImage.image = chosenImage
+            
+            self.cropAndSend(chosenImage)
+            //self.sendImagePOST(chosenImage)
         })
     }
     
-    
     func stateChanged() {
+        self.cropImg1.hidden = true
+        self.cropImg2.hidden = true
+        self.cropImg3.hidden = true
+        self.cropImg4.hidden = true
+        
         switch self.searchSetting {
         case .Object:
             self.searchSetting = .Color
             self.outputTextAndVoice("Color mode", speechRate :0.008, textEnable : true)
         case .Color:
-            self.searchSetting = .currency
+            self.searchSetting = .Currency
             self.outputTextAndVoice("Currency mode", speechRate :0.008, textEnable : true)
-        case .currency:
+        case .Currency:
+            self.searchSetting = .Live
+            self.outputTextAndVoice("LiveStream mode", speechRate :0.008, textEnable : true)
+        case .Live:
+            self.searchSetting = .Test
+            self.outputTextAndVoice("Test mode", speechRate :0.008, textEnable : true)
+            self.cropImg1.hidden = false
+            self.cropImg2.hidden = false
+            self.cropImg3.hidden = false
+            self.cropImg4.hidden = false
+        case .Test:
             self.searchSetting = .Object
             self.outputTextAndVoice("Object mode", speechRate :0.008, textEnable : true)
         default:
@@ -158,12 +193,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                         var imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sampleBuffer)
                         var dataProvider = CGDataProviderCreateWithCFData(imageData)
                         var cgImageRef = CGImageCreateWithJPEGDataProvider(dataProvider, nil, true, kCGRenderingIntentDefault)
+                        
+                        //UIImageOrientationUp,            // default orientation
+                        //UIImageOrientationDown,          // 180 deg rotation
+                        //UIImageOrientationLeft,          // 90 deg CCW
+                        //UIImageOrientationRight,         // 90 deg CW
+                        //UIImageOrientationUpMirrored,    // as above but image mirrored along other axis. horizontal flip
+                        //UIImageOrientationDownMirrored,  // horizontal flip
+                        //UIImageOrientationLeftMirrored,  // vertical flip
+                        //UIImageOrientationRightMirrored, // vertical flip
                         var myimage = UIImage(CGImage: cgImageRef, scale: 1, orientation: UIImageOrientation.Right)
                         
-                        self.sendImagePOST(myimage) // send image to the server
-                        
-                        
                         self.capturedImage.image = myimage
+                        
+                        self.cropAndSend(myimage)
+                        //self.sendImagePOST(myimage) // send image to the server
                         //UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
                     }
                 })
@@ -172,28 +216,73 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
+    func cropAndSend(myimage : UIImage!) {
+        
+        // Create rectangles
+        //let croprect1 : CGRect = CGRectMake(0, 0, (myimage.size.width/2), (myimage.size.height/2))
+        //let croprect2 : CGRect = CGRectMake(myimage.size.width/2, 0, (myimage.size.width/2), (myimage.size.height/2))
+        //let croprect3 : CGRect = CGRectMake(0, myimage.size.height/2 , (myimage.size.width/2), (myimage.size.height/2))
+        //let croprect4 : CGRect = CGRectMake(myimage.size.width/2, myimage.size.height/2, (myimage.size.width/2), (myimage.size.height/2))
+        
+        // Create rectangles
+        let croprect1 : CGRect = CGRectMake(0, 0, (myimage.size.width/2), (myimage.size.height))
+        let croprect2 : CGRect = CGRectMake(myimage.size.width/2, 0, (myimage.size.width/2), (myimage.size.height))
+        let croprect3 : CGRect = CGRectMake(0, myimage.size.height/2 , (myimage.size.width), (myimage.size.height/2))
+        let croprect4 : CGRect = CGRectMake(0, myimage.size.height/2, (myimage.size.width), (myimage.size.height/2))
+        
+        // Create rectangles
+        //let croprect1 : CGRect = CGRectMake((myimage.size.width/6)                       , (myimage.size.height/6)                         , (myimage.size.width/3), (myimage.size.height/3))
+        //let croprect2 : CGRect = CGRectMake((myimage.size.width/2)-(myimage.size.width/6), (myimage.size.height/6)                         , (myimage.size.width/3), (myimage.size.height/3))
+        //let croprect3 : CGRect = CGRectMake((myimage.size.width/6)                       , (myimage.size.height/2)-(myimage.size.height/6) , (myimage.size.width/3), (myimage.size.height/3))
+        //let croprect4 : CGRect = CGRectMake((myimage.size.width/2)-(myimage.size.width/6), (myimage.size.height/2)-(myimage.size.height/6) , (myimage.size.width/3), (myimage.size.height/3))
+        
+        
+        // Draw new image in current graphics context
+        let imageRef1 : CGImageRef = CGImageCreateWithImageInRect(myimage.CGImage, croprect1)
+        let imageRef2 : CGImageRef = CGImageCreateWithImageInRect(myimage.CGImage, croprect2)
+        let imageRef3 : CGImageRef = CGImageCreateWithImageInRect(myimage.CGImage, croprect3)
+        let imageRef4 : CGImageRef = CGImageCreateWithImageInRect(myimage.CGImage, croprect4)
+        // Create new cropped UIImage
+        let croppedImage1 : UIImage = UIImage(CGImage: imageRef1)!
+        let croppedImage2 : UIImage = UIImage(CGImage: imageRef2)!
+        let croppedImage3 : UIImage = UIImage(CGImage: imageRef3)!
+        let croppedImage4 : UIImage = UIImage(CGImage: imageRef4)!
+        
+        self.cropImg1.contentMode = .ScaleAspectFit
+        self.cropImg1.image = croppedImage1
+        self.cropImg2.contentMode = .ScaleAspectFit
+        self.cropImg2.image = croppedImage2
+        self.cropImg3.contentMode = .ScaleAspectFit
+        self.cropImg3.image = croppedImage3
+        self.cropImg4.contentMode = .ScaleAspectFit
+        self.cropImg4.image = croppedImage4
+       
+        self.cropCount = 0
+        self.myResultArray = []
+        
+        self.sendImagePOST(myimage)
+        //if self.searchSetting == .Test {
+        //    self.sendImagePOST(croppedImage1)
+        //    self.sendImagePOST(croppedImage2)
+        //    self.sendImagePOST(croppedImage3)
+        //    self.sendImagePOST(croppedImage4)
+        //}
+    }
+    
     
     let manager = AFHTTPRequestOperationManager()
     func sendImagePOST(myimage : UIImage!){
-        //// change parameters: nil, to parameters: params,
-        //var params = [ "familyId":"10000",
-        //    "contentBody" : "Some body content for the test application",
-        //    "name" : "the name/title", "typeOfContent":"photo" ]
-        
-        if self.switchIsOn == false {
-            println(" ")
-            println("=======================================================================================================")
-            println(" ")
-            self.outputTextAndVoice("One second please...", speechRate :0.1)
-        }
+        self.outputTextAndVoice("One second please...", speechRate :0.1)
+        self.myTextLabel.text = "One second please..."
+        self.startAVPLayer("StartAudio")
         
         //var imageData = UIImagePNGRepresentation(myimage)
         var imageData = UIImageJPEGRepresentation(myimage, 1.0) //max=1.0
         if imageData != nil{
-            
             //let postURL = "http://requestb.in/powu8hpo"
             //let postURL = "http://molestdepressed.corp.gq1.yahoo.com:8000/api2"
             let postURL = "http://molestdepressed.corp.gq1.yahoo.com:8000/api"
+            //let postURL = "http://tradingshading.corp.gq1.yahoo.com:8000/api"
             
             //let manager = AFHTTPRequestOperationManager()
             // "text/plain, text/html, application/json, audio/wav, application/octest-stream")
@@ -203,13 +292,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                     data.appendPartWithFileData(imageData, name: "file", fileName: "image.jpg", mimeType: "image/jpeg")
                 },
                 success: { (operation: AFHTTPRequestOperation!,response: AnyObject!) in //operation, response in
-                    
                     self.takePictureButton.enabled = true
                     self.busyWaiting = false
                     self.zoomImage.hidden = false
-                    self.dictionaryToArray(response)
                     
-                    if self.switchIsOn == true { self.takePhoto()  }
+                    ++self.cropCount
+                    self.myResultArray += self.convToEnumArray(response)
+                    //if self.searchSetting == .Test {
+                    //    if self.cropCount == 5 {
+                    //        self.outputResult()
+                    //    }
+                    //}else{
+                         self.outputResult()
+                    //}
                 },
                 failure: { operation, error in
                     println("[fail] operation: \(operation), error: \(error)")
@@ -222,139 +317,162 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
-    
-    func dictionaryToArray_old(response: AnyObject)  { // -> [String] {
-        let exceptionString : String = "outdoor indoor minimalism monochrome blackandwhite blackandwhite depth of field blur abstract vintage empty"
-        
-        //println(response)
-        
-        if let receiver = response as? NSArray {
-            var d = receiver as NSArray
-            if d.count > 0 {
-                var myArray:[(name: String, value: Float)] = []
-                for element in d {
-                    var myNum : Float = element[1]  as Float
-                    var myTag : String = element[0]  as String
-                    //println(myNum)
-                    //println(myTag)
-                    myArray += [(name: myTag, value: myNum)]
-                }
-                myArray.sort { $0.0 == $1.0 ?  $0.0 > $1.0 : $0.1 > $1.1 }
-                println(myArray)
-                println(" ")
-                var i = 0
-                if self.switchIsOn == false { //camera mode
-                    var outputString = "I see "
-                    for myTupels in myArray{
-                        if (exceptionString.rangeOfString(myTupels.name) == nil ) || (myArray.count < 4) {
-                            i++
-                            if i > 2 {
-                                outputString += "and " + colorOrNot(myTupels.name)
-                                break
-                            }
-                            outputString += colorOrNot(myTupels.name) + ", "
-                        }
-                    }
-                    if outputString != "I see " {
-                        self.outputTextAndVoice(outputString, speechRate :0.06)
-                    } else {
-                        self.outputTextAndVoice("Try again.", speechRate :0.06)
-                    }
-                } else { //Video mode
-                    var outputString = ""
-                    for myTupels in myArray{
-                        if exceptionString.rangeOfString(myTupels.name) == nil{
-                            i++
-                            if i > 1 {
-                                outputString += colorOrNot(myTupels.name) + " "
-                                break
-                            }
-                        }
-                    }
-                    if outputString != " " {
-                        self.outputTextAndVoice(outputString, speechRate :0.06)
-                    }
-                }
-                
-            } else{
-                //empty result
-                self.outputTextAndVoice("Try again.", speechRate :0.06)
-            }
-            
-        } else {
-            println("Bad Dictionary")
-        }
-    }
-    
-    
-    func dictionaryToArray(response: AnyObject)  { // -> [String] {
-        let exceptionString : String = "outdoor indoor minimalism monochrome blackandwhite blackandwhite depth of field blur abstract vintage empty"
-        println(response)
+    func convToEnumArray(response: AnyObject) -> [(name: String, value: Float)] {
+        var myArray:[(name: String, value: Float)] = []
         if let receiver = response as? NSDictionary {
             var d = receiver as Dictionary
             if d.count > 0 {
-                var myArray:[(name: String, value: Float)] = []
                 for (autotag, numbers) in d {
-                    var myNum : Float = numbers as Float
-                    var myTag : String = autotag as String
-                    //println(myNum)
-                    //println(myTag)
-                    myArray += [(name: myTag, value: myNum)]
+                    myArray += [(name: autotag as String, value: numbers as Float)]
                 }
                 myArray.sort { $0.0 == $1.0 ?  $0.0 > $1.0 : $0.1 > $1.1 }
-                //println(myArray)
-                println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                var i = 0
-                if self.switchIsOn == false { //camera mode
-                    var outputString = "I see "
-                    for myTupels in myArray{
-                        if exceptionString.rangeOfString(myTupels.name) == nil{
-                            i++
-                            if i > 2 {
-                                outputString += "and " + colorOrNot(myTupels.name)
-                                break
-                            }
-                            outputString += colorOrNot(myTupels.name) + ", "
-                        }
-                    }
-                    if outputString != "I see " {
-                        self.outputTextAndVoice(outputString, speechRate :0.06)
-                    } else {
-                        self.outputTextAndVoice("Try again.", speechRate :0.06)
-                    }
-                } else { //Video mode
-                    var outputString = ""
-                    for myTupels in myArray{
-                        if exceptionString.rangeOfString(myTupels.name) == nil{
-                            i++
-                            if i > 1 {
-                                outputString += colorOrNot(myTupels.name) + " "
-                                break
-                            }
-                        }
-                    }
-                    if outputString != " " {
-                        self.outputTextAndVoice(outputString, speechRate :0.06)
-                    }
-                }
-                
-            } else{
-                //empty result
-                self.outputTextAndVoice("Try again.", speechRate :0.06)
             }
-            
+        }  else if let receiver = response as? NSArray {
+            var d = receiver as NSArray
+            for element in d {
+                myArray += [(name: element[0]  as String, value: element[1]  as Float)]
+            }
+            myArray.sort { $0.0 == $1.0 ?  $0.0 > $1.0 : $0.1 > $1.1 }
         } else {
-            println("Bad Dictionary")
+            println("Bad Dicionary or JSON.")
+            self.outputTextAndVoice("Bad Dicionary or JSON.", speechRate :0.06)
+                
+        }
+        println(self.cropCount)
+        println(myArray)
+        println("========================================")
+        return myArray
+    }
+    func colorOrNot(inputString: String) -> Bool {
+        if self.colorString.rangeOfString(" "+inputString+" ") != nil{
+            return  true
+        }else{
+            return false
         }
     }
     
-    func colorOrNot (inputString: String) -> String {
-        let colorString : String = "monochrome blackandwhite white background aposematic coloration black blue ultramarine blue chromatic gold gray green magenta monochrome neon orange pink purple crimson fuschia maroon red reddish teal white yellow "
+    
+    //* * * Voic and text Output functions * * *
+    func outputResult(){
+        var myArray = self.myResultArray
+        myArray.sort { $0.0 == $1.0 ?  $0.0 > $1.0 : $0.1 > $1.1 }
+        myArray = self.removeDuplicates(myArray)
+        println("__________________________________________________________________________________________________________")
+        println(" ")
+        println(myArray)
+        println(" ")
+        switch self.searchSetting {
+            case .Object:
+                self.objectOut(myArray)
+            case .Color:
+                self.colorOut(myArray)
+            case .Currency:
+                self.currencyOut(myArray)
+            case .Live:
+                self.liveOut(myArray)
+            case .Test:
+                self.testOut(myArray)
+            default:
+                self.objectOut(myArray)
+                break
+        }
+    }
+    func removeDuplicates(myArray: [(name: String, value: Float)]) -> [(name: String, value: Float)] {
+        var filter = Dictionary<String,Int>()
+        var len = myArray.count
+        var strArray = myArray
+        for var index = 0; index < len ; ++index {
+            var value = strArray[index]
+            if (filter[value.name] != nil) {
+                strArray.removeAtIndex(index--)
+                len--
+            }else{
+                filter[value.name] = 1
+            }
+        }
+        return strArray
+    }
+    
+    func objectOut(myArray: [(name: String, value: Float)]){
+        var i = 0
+        let startString = "I see "
+        var outputString = startString
+        for myTupels in myArray{
+            if (self.exceptionString.rangeOfString(" "+myTupels.name+" ")==nil) && (self.colorOrNot(myTupels.name)==false){
+                i++
+                if i > 2 {
+                    outputString += "and " + myTupels.name
+                    break
+                }
+                outputString += myTupels.name + ", "
+            }
+        }
+        if outputString != startString {
+            self.outputTextAndVoice(outputString, speechRate :0.06)
+        } else {
+            startAVPLayer("NotFoundAudio")
+            self.outputTextAndVoice("Try again.", speechRate :0.06)
+        }
+
+    }
+    func colorOut(myArray: [(name: String, value: Float)]){
+        var i = 0
+        let startString = "I see the color "
+        var outputString = startString
+        for myTupels in myArray{
+            if (self.colorOrNot(myTupels.name)==true){
+                i++
+                if i > 2 {
+                    outputString += "and the color " + myTupels.name
+                    break
+                }
+                outputString += myTupels.name + ", "
+            }
+        }
+        if outputString != startString {
+            self.outputTextAndVoice(outputString, speechRate :0.06)
+        } else {
+            startAVPLayer("NotFoundAudio")
+            self.outputTextAndVoice("Try again.", speechRate :0.06)
+        }
+    }
+    func currencyOut(myArray: [(name: String, value: Float)]){
+        self.outputTextAndVoice("Currency mode is not available", speechRate :0.06)
+    }
+    func liveOut(myArray: [(name: String, value: Float)]){
+        var i = 0
+        let startString = ""
+        var outputString = startString
+        for myTupels in myArray{
+            if ((self.exceptionString.rangeOfString(" "+myTupels.name+" ")==nil) || (myArray.count<4)) {
+                i++
+                if i > 2 {
+                    outputString += " " + myTupels.name
+                    break
+                }
+                outputString += myTupels.name + ", "
+            }
+        }
+        if outputString != startString {
+            self.outputTextAndVoice(outputString, speechRate :0.06)
+        }
+        self.takePhoto()
         
-        if colorString.rangeOfString(inputString) != nil{
-            return  "the color " + inputString
-        }else{
-            return inputString
+    }
+    func testOut(myArray: [(name: String, value: Float)]){
+        var i = 0
+        let startString = ""
+        var outputString = startString
+        for myTupels in myArray{
+            i++
+            outputString += myTupels.name + ", "
+            if myArray.count==5 { break }
+        }
+        if outputString != startString {
+            self.outputTextAndVoice(outputString, speechRate :0.06)
+        } else {
+            startAVPLayer("NotFoundAudio")
+            self.outputTextAndVoice("Try again.", speechRate :0.06)
         }
     }
     
@@ -375,7 +493,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         myUtterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         synth.speakUtterance(myUtterance)
     }
-    
     
     //* * * Welcome messages * * *
     func welcomeIntroNoCamera() {
@@ -475,7 +592,68 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             dispatch_get_main_queue(), closure)
     }
 
+    //* * * Sound * * *
+    var myWaitingSound = AVAudioPlayer()
+    func waitingSoundaa(){
+        
+        let filePath:NSURL = NSURL(fileURLWithPath: "Users/pouria/Desktop/Apps/sounds/Alerts/hello.m4r")!
+        println(filePath)
+        var er:NSError?
+        let audioPlayer:AVAudioPlayer = AVAudioPlayer(contentsOfURL: filePath, error: &er)
+        
+        
+        if (er != nil) {
+            println("There was an error: \(er)")
+        } else {
+            println("playing...")
+            audioPlayer.play()
+            while audioPlayer.playing{
+                println("playing")
+            }
+        }
 
+    }
+    
+    //* * * The SSound player * * *
+    //The player instance needs to be an instance variable. Otherwise it will disappear before playing.
+    var avPlayer:AVAudioPlayer!
+    func startAVPLayer(myAudio : String) {
+        //var error: NSError?
+        //let fileURL:NSURL = NSBundle.mainBundle().URLForResource("hello", withExtension: "m4r")
+        /*var fileURL:NSURL = NSURL(fileURLWithPath: "Users/pouria/Desktop/Apps/sounds/Alerts/hello.m4r")!
+        switch myAudio {
+            case "StartAudio":
+                fileURL = NSURL(fileURLWithPath: "Users/pouria/Desktop/Apps/sounds/Alerts/hello.m4r")!
+            case "NotFoundAudio":
+                fileURL = NSURL(fileURLWithPath: "Users/pouria/Desktop/Apps/sounds/Alerts/synth.m4r")!
+            default:
+                fileURL = NSURL(fileURLWithPath: "Users/pouria/Desktop/Apps/sounds/Alerts/hello.m4r")!
+                break
+        }*/
+        
+        
+        //The player must be a field. Otherwise it will be released before playing starts.
+        //self.avPlayer = AVAudioPlayer(contentsOfURL: fileURL, error: &error)
+        //if avPlayer == nil {
+        //    if let e = error { println(e.localizedDescription) }
+        //}else {
+        //    println("playing \(fileURL)")
+        //    // avPlayer.delegate = self
+        //    avPlayer.prepareToPlay()
+        //    avPlayer.volume = 1.0
+        //    avPlayer.play()
+       // }
+    }
+    func stopAVPLayer() {
+        if avPlayer.playing { avPlayer.stop() }
+    }
+    func toggleAVPlayer() {
+        if avPlayer.playing {
+            avPlayer.pause()
+        } else {
+            avPlayer.play()
+        }
+    }
 
 }
 
